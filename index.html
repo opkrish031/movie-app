@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        text-transform: capitalize;
+      }
+      body {
+        background-color: #ccc;
+      }
+      .main {
+        margin: 30px auto;
+        max-width: 1440px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 30px;
+      }
+      .placeholder {
+        display: flex;
+        align-items: center;
+        width: 60%;
+        box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.3);
+      }
+      .placeholder input {
+        border: none;
+        outline: none;
+        padding: 8px 5px;
+        width: 95%;
+      }
+      .placeholder button {
+        border: none;
+        background-color: #fff;
+        padding: 8px;
+        cursor: pointer;
+        color: #a0a0a0;
+      }
+      .posters {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+      }
+      .banner {
+        flex-basis: 19%;
+        margin: 3% 1%;
+        background-color: #fff;
+        padding: 10px;
+        box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.3);
+        transition: 0.5s ease;
+      }
+      .banner:hover {
+        transform: scale(1.1);
+      }
+      .banner img {
+        width: 100%;
+      }
+      .banner h3 {
+        font-size: 20px;
+        margin: 5px 0px;
+      }
+      .banner h3 span {
+        font-weight: lighter;
+      }
+      .banner p {
+        font-weight: bold;
+        margin: 5px 0px;
+      }
+      .banner p span {
+        font-weight: lighter;
+      }
+      .buttons {
+        display: flex;
+        gap: 25px;
+        justify-content: center;
+        align-items: center;
+      }
+      .counter{
+        font-size: 22px;
+        font-weight: bold;
+      }
+      @media only screen and (min-width: 200px) and (max-width: 575px) {
+        .banner {
+          flex-basis: 40%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main">
+      <div class="placeholder">
+        <input type="text" placeholder="Enter movie name..." />
+        <button id="but-search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+      </div>
+      <div class="posters"></div>
+      <div class="buttons">
+        <buttons id="left"><i class="fa-solid fa-chevron-left"></i></buttons>
+        <div class="counter"></div>
+        <buttons id="right"><i class="fa-solid fa-chevron-right"></i></buttons>
+      </div>
+    </div>
+  </body>
+  <script>
+    let inputSearch = document.querySelector("input");
+    let posterDiv = document.querySelector(".posters");
+    let currentPage = 1;
+
+    inputSearch.addEventListener("keyup", (e) => {
+      let inputValue = e.target.value;
+      currentPage = 1;
+      displayData(inputValue, currentPage);
+      console.log(inputValue);
+    });
+
+    let displayData = async (inputValue, currentPage = 1) => {
+      let url;
+      if (!inputValue) {
+        url = `https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=04c35731a5ee918f014970082a0088b1&page=${currentPage}`;
+      } else {
+        url = `https://api.themoviedb.org/3/search/movie?&api_key=04c35731a5ee918f014970082a0088b1&query=${inputValue}`;
+      }
+
+      let api = await fetch(url);
+      let jsonApi = await api.json();
+      let newData = jsonApi.results;
+
+      posterDiv.innerHTML = "";
+      newData.map((v, i) => {
+        posterDiv.innerHTML += `
+        <div class="banner">
+          <img src="https://image.tmdb.org/t/p/w1280${v.poster_path}" alt="" />
+          <h3>Movie name:<span> ${v.title} </span></h3>
+          <p>release date:<span> ${v.release_date}</span></p>
+          <p>Average Rating:<span> ${v.vote_average}</span></p>
+        </div>
+        `;
+      });
+    };
+
+    displayData();
+
+    let counterFunction = () => {
+      let leftButton = document.querySelector("#left");
+      let counter = document.querySelector(".counter");
+      let rightButton = document.querySelector("#right");
+
+      counter.textContent = currentPage;
+
+      let buttonState = () => {
+        leftButton.disabled = currentPage <= 1;
+        counter.textContent = currentPage;
+      };
+
+      leftButton.addEventListener("click", () => {
+        if (currentPage > 1) {
+          currentPage--;
+          displayData(inputSearch.value, currentPage);
+          buttonState();
+        }
+      });
+
+      rightButton.addEventListener("click", () => {
+        currentPage++;
+        displayData(inputSearch.value, currentPage);
+        buttonState();
+      });
+      buttonState();
+    };
+    console.log(currentPage);
+
+    counterFunction();
+  </script>
+</html>
